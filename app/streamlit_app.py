@@ -1,4 +1,8 @@
 import streamlit as st
+import plotly.io as pio
+
+# Fix pour l'erreur removeChild
+pio.renderers.default = 'browser'
 import pandas as pd
 import numpy as np
 import joblib
@@ -372,7 +376,7 @@ if analyze_button:
             yaxis_range=[0, 1],
             showlegend=True
         )
-        st.plotly_chart(fig_scores, use_container_width=True)
+        st.plotly_chart(fig_scores, use_container_width=False)
         
         # Graphique 2: Erreur de reconstruction
         fig_mse = go.Figure()
@@ -390,7 +394,7 @@ if analyze_button:
             yaxis_title="Mean Squared Error (MSE)",
             showlegend=False
         )
-        st.plotly_chart(fig_mse, use_container_width=True)
+        st.plotly_chart(fig_mse, use_container_width=False)
     
     with col2:
         # Graphique 3: Radar chart des features normalisées
@@ -413,7 +417,7 @@ if analyze_button:
             ),
             showlegend=False
         )
-        st.plotly_chart(fig_radar, use_container_width=True)
+        st.plotly_chart(fig_radar, use_container_width=False)
         
         # Graphique 4: Décision binaire des modèles
         fig_decision = go.Figure(data=[
@@ -430,7 +434,7 @@ if analyze_button:
             yaxis_range=[0, 1.2],
             showlegend=True
         )
-        st.plotly_chart(fig_decision, use_container_width=True)
+        st.plotly_chart(fig_decision, use_container_width=False)
     
     # Tableau des caractéristiques
     st.markdown("---")
