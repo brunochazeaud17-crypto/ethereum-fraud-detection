@@ -1,4 +1,4 @@
-# 🔍 Ethereum Fraud Detection
+# 🔍 Ethereum Anomalies Detection
 
 Détecteur d'anomalies non supervisé pour portefeuilles Ethereum utilisant Isolation Forest et Autoencoder en consensus.
 
@@ -29,7 +29,7 @@ Détecter les comportements suspects sur la blockchain Ethereum sans données la
 ## 🛠️ Installation locale
 
 ```bash
-git clone https://github.com/votre-username/ethereum-fraud-detection.git
+git clone https://github.com/brunochazeaud17-crypto/ethereum-fraud-detection.git
 cd ethereum-fraud-detection
 pip install -r requirements.txt
 streamlit run app/streamlit_app.py
