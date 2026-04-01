@@ -1,15 +1,15 @@
-import streamlit as st
-import plotly.io as pio
-
-# Fix pour l'erreur removeChild
-pio.renderers.default = 'browser'
 import pandas as pd
+import request
+import streamlit as st
 import numpy as np
-import joblib
 import tensorflow as tf
-import requests
+import joblib
 import plotly.express as px
 import plotly.graph_objects as go
+import plotly.io as pio
+
+# Contournement pour le bug d'affichage Plotly sur Streamlit Cloud
+pio.renderers.default = 'browser'
 
 # Configuration de la page
 st.set_page_config(page_title="Ethereum Fraud Detection", page_icon="🔍", layout="wide")
