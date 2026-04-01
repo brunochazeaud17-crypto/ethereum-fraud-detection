@@ -229,6 +229,26 @@ with st.sidebar.expander("Saisie directe des caractéristiques"):
 analyze_button = st.sidebar.button("🔍 Analyser", type="primary")
 
 # --------------------------------------------------------
+# FONCTION POUR DÉTERMINER LE NIVEAU DE RISQUE (NOUVEAUX SEUILS)
+# --------------------------------------------------------
+def get_risk_level(risk_score):
+    """
+    Détermine le niveau de risque en fonction du score avec les nouveaux seuils:
+    - 0 à 50%: risque faible
+    - 50 à 60%: risque modéré
+    - 60 à 80%: risque élevé
+    - 80 à 100%: risque très élevé
+    """
+    if risk_score < 0.5:
+        return "🟢 RISQUE FAIBLE", "Comportement typique d'un portefeuille Ethereum légitime."
+    elif risk_score < 0.6:
+        return "⚠️ RISQUE MODÉRÉ", "Comportement inhabituel détecté. Une surveillance s'impose."
+    elif risk_score < 0.8:
+        return "🚨 RISQUE ÉLEVÉ", "Comportement fortement anormal. Investigation immédiate requise."
+    else:
+        return "🔴 RISQUE TRÈS ÉLEVÉ", "Comportement extrêmement suspect. Intervention urgente nécessaire."
+
+# --------------------------------------------------------
 # 3. LOGIQUE DE PRÉDICTION
 # --------------------------------------------------------
 if analyze_button:
@@ -313,19 +333,22 @@ if analyze_button:
     auto_risk = min(1.0, mse / threshold) if is_anomaly_ae else mse / (threshold * 2)
     final_risk_score = (iso_risk + auto_risk) / 2
     
-    # --- Consensus ---
-    if is_anomaly_iso and is_anomaly_ae:
-        niveau_risque = "🚨 RISQUE ÉLEVÉ"
-        recommendation = "Ce portefeuille présente un comportement fortement anormal. Investigation immédiate requise."
-    elif is_anomaly_iso or is_anomaly_ae:
-        niveau_risque = "⚠️ RISQUE MODÉRÉ"
-        if is_anomaly_iso:
-            recommendation = "Comportement extrême détecté. Surveiller ce portefeuille."
-        else:
-            recommendation = "Pattern subtil anormal. Peut indiquer une fraude sophistiquée."
+    # --- Détermination du niveau de risque avec les nouveaux seuils ---
+    niveau_risque, recommendation = get_risk_level(final_risk_score)
+    
+    # --- Consensus basé sur les nouveaux seuils ---
+    if final_risk_score >= 0.8:
+        # Risque très élevé - les deux modèles doivent probablement détecter
+        consensus_note = "🔴 ALERTE MAXIMALE"
+    elif final_risk_score >= 0.6:
+        # Risque élevé - au moins un modèle détecte
+        consensus_note = "⚠️ ANOMALIE CONFIRMÉE"
+    elif final_risk_score >= 0.5:
+        # Risque modéré - signaux faibles
+        consensus_note = "🔍 SURVEILLANCE ACTIVE"
     else:
-        niveau_risque = "🟢 NORMAL"
-        recommendation = "Comportement typique d'un portefeuille Ethereum légitime."
+        # Risque faible - comportement normal
+        consensus_note = "✅ COMPORTEMENT NORMAL"
     
     # --------------------------------------------------------
     # 4. AFFICHAGE DES RÉSULTATS
@@ -339,15 +362,17 @@ if analyze_button:
     with col2:
         st.metric("Score de risque", f"{final_risk_score:.1%}")
     with col3:
-        st.metric("Consensus", "✅ Normal" if not (is_anomaly_iso or is_anomaly_ae) else "⚠️ Anomalie")
+        st.metric("Consensus", consensus_note)
     
     st.markdown(f"### 💡 Recommandation")
     st.markdown(f"**{recommendation}**")
     
-    # Barre de progression
-    if final_risk_score > 0.7:
-        st.progress(final_risk_score, text=f"🔴 {final_risk_score:.0%} - Risque critique")
-    elif final_risk_score > 0.4:
+    # Barre de progression avec couleurs adaptées aux nouveaux seuils
+    if final_risk_score >= 0.8:
+        st.progress(final_risk_score, text=f"🔴 {final_risk_score:.0%} - Risque très élevé")
+    elif final_risk_score >= 0.6:
+        st.progress(final_risk_score, text=f"🚨 {final_risk_score:.0%} - Risque élevé")
+    elif final_risk_score >= 0.5:
         st.progress(final_risk_score, text=f"🟡 {final_risk_score:.0%} - Risque modéré")
     else:
         st.progress(final_risk_score, text=f"🟢 {final_risk_score:.0%} - Risque faible")
@@ -452,12 +477,14 @@ if analyze_button:
     
     st.dataframe(features_df_vis, use_container_width=True, hide_index=True)
     
-    # Alerte si risque élevé
-    if final_risk_score > 0.7:
-        st.error("🚨 **ALERTE DE SÉCURITÉ** : Comportement hautement suspect détecté !")
+    # Alerte selon les nouveaux seuils
+    if final_risk_score >= 0.8:
+        st.error("🔴 **ALERTE DE SÉCURITÉ MAXIMALE** : Risque très élevé détecté ! Intervention immédiate requise.")
         st.balloons()
-    elif final_risk_score > 0.4:
-        st.warning("⚠️ **ATTENTION** : Comportement inhabituel détecté.")
+    elif final_risk_score >= 0.6:
+        st.error("🚨 **ALERTE DE SÉCURITÉ** : Risque élevé détecté ! Investigation immédiate requise.")
+    elif final_risk_score >= 0.5:
+        st.warning("⚠️ **ATTENTION** : Risque modéré détecté. Surveillance active recommandée.")
 
 else:
     # Message d'accueil
@@ -475,7 +502,14 @@ else:
         
         **Comme dans 90% des cas réels, cette solution fonctionne sans données labellisées.**
         
-        ### 📊 Comment utiliser
+        ### 📊 Échelle de risque
+        
+        - **🟢 0-50%** : Risque faible - Comportement normal
+        - **⚠️ 50-60%** : Risque modéré - Surveillance active
+        - **🚨 60-80%** : Risque élevé - Investigation requise
+        - **🔴 80-100%** : Risque très élevé - Intervention urgente
+        
+        ### 📝 Comment utiliser
         
         **Option 1 - Adresse Ethereum** : Entrez une adresse, l'API récupère automatiquement les données
         **Option 2 - Mode manuel** : Saisissez directement les 7 caractéristiques du portefeuille
