@@ -23,8 +23,7 @@ Détecter les comportements suspects sur la blockchain Ethereum sans données la
 7. Taux d'erreur des transactions (%)
 
 ## 🚀 Démo en ligne
-
-[Lien vers l'application Streamlit](https://share.streamlit.io/votre-username/ethereum-fraud-detection)
+(https://ethereum-anomalies-detection.streamlit.app/)
 
 ## 🛠️ Installation locale
 
